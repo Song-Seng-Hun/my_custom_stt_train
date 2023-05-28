@@ -1,0 +1,11 @@
+use_cuda: True
+dataset: 'kspon'
+dataset_path: 'D:\\workspace\\model\\my_custom_stt_train\\data\\kspon\\KsponSpeech_eval'
+transcripts_path: 'data\\eval_transcript.txt'
+model_path: 'D:\\workspace\\model\\my_custom_stt_train\\outputs\\2023-05-25\\'
+output_unit: 'character'
+batch_size: 20
+num_workers: 4
+print_every: 20
+decode: 'greedy'
+k: 3
