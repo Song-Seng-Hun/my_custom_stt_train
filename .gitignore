@@ -154,8 +154,10 @@ cython_debug/
 # Data
 *.wav
 *.pcm
+*.trn
 *.pt
 *.csv
+transcripts.txt
 hydra.yaml
 config.yaml
 overrides.yaml
