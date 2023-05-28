@@ -1,0 +1,14 @@
+numpy
+pandas
+matplotlib
+librosa
+torchaudio
+tqdm
+sentencepiece
+warp_rnnt
+hydra-core
+astropy
+python-Levenshtein
+bookish
+torchlight
+ipykernel

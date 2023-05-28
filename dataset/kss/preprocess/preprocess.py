@@ -1,0 +1,100 @@
+# Copyright (c) 2020, Soohwan Kim. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os
+import re
+
+
+def bracket_filter(sentence, mode='phonetic'):
+    new_sentence = str()
+
+    if mode == 'phonetic':
+        flag = False
+
+        for ch in sentence:
+            if ch == '(' and flag is False:
+                flag = True
+                continue
+            if ch == '(' and flag is True:
+                flag = False
+                continue
+            if ch != ')' and flag is False:
+                new_sentence += ch
+
+    else:
+        raise ValueError("Unsupported mode : {0}".format(mode))
+
+    return new_sentence
+
+
+def special_filter(sentence, mode='phonetic', replace=None):
+    SENTENCE_MARK = ['?', '!', '.', ',']
+    NOISE = ['o', 'n', 'u', 'b', 'l']
+    EXCEPT = ['/', '+', '*', '-', '@', '$', '^', '&', '[', ']', '=', ':', ';']
+
+    new_sentence = str()
+    for idx, ch in enumerate(sentence):
+        if ch not in SENTENCE_MARK:
+            if idx + 1 < len(sentence) and ch in NOISE and sentence[idx + 1] == '/':
+                continue
+
+        if ch == '#':
+            new_sentence += '샾'
+
+        elif ch == '%':
+            new_sentence += '퍼센트'
+
+        elif ch not in EXCEPT:
+            new_sentence += ch
+
+    pattern = re.compile(r'\s\s+')
+    new_sentence = re.sub(pattern, ' ', new_sentence.strip())
+    return new_sentence
+
+
+def sentence_filter(raw_sentence, mode, replace=None):
+    return special_filter(bracket_filter(raw_sentence, mode), mode, replace)
+
+
+def preprocess(dataset_path, mode='phonetic'):
+    print('preprocess started..')
+
+    audio_paths = list()
+    transcripts = list()
+
+    # kss
+    for folder in os.listdir(dataset_path):
+        # folder : {1, ..., 4}
+        path = os.path.join(dataset_path, folder)
+        transcript = os.path.join(path, 'transcript.v.1.4.txt')
+        with open('D:/workspace/model/my_custom_sst_train/data/archive/transcript.v.1.4.txt', 'r', encoding="utf-8") as f:
+            for line in f.readlines():
+                frac = line.split('|')
+                audio_paths.append(os.path.join(dataset_path, frac[0]).replace('/','\\'))
+                new_sentence = sentence_filter(frac[1], mode=mode)
+                transcripts.append(new_sentence)
+
+            # for idx, subfolder in enumerate(os.listdir(path)):
+            #     path = os.path.join(dataset_path, folder, subfolder)
+
+            #     for jdx, file in enumerate(os.listdir(path)):
+            #         if file.endswith('.txt'):
+            #             with open(os.path.join(path, file), "r", encoding='cp949') as f:
+            #                 raw_sentence = f.read()
+            #                 new_sentence = sentence_filter(raw_sentence, mode=mode)
+
+            #             audio_paths.append(os.path.join(folder, subfolder, file))
+            #             transcripts.append(new_sentence)
+
+    return audio_paths, transcripts
